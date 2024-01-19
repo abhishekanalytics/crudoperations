@@ -79,7 +79,6 @@ def manage_individual_task(task_id):
 
 # Register the Blueprint with the Flask app
 app.register_blueprint(tasks_bp, url_prefix='/large')
-
 if __name__ == '__main__':
     app.run(debug=True)
 
