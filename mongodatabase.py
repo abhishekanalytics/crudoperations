@@ -8,24 +8,24 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = "mongodb://localhost:27017/monodatabase"
 mongo = PyMongo(app)
 
-# Here I am Creating a Blueprint for large
-tasks_bp = Blueprint('large', __name__)
+# Create a Blueprint for tasks
+tasks_bp = Blueprint('tasks', __name__)
 
 @tasks_bp.route('/', methods=['GET', 'POST'])
 def list_and_create_tasks():
     try:
-        tasks_collection = mongo.db.large
+        tasks_collection = mongo.db.tasks
 
         if request.method == 'GET':
-            # This is for List all large
-            large = list(tasks_collection.find())
+            # This is for List all tasks
+            tasks = list(tasks_collection.find())
             # Here, I am Converting ObjectId to string for JSON serialization
-            for task in large:
+            for task in tasks:
                 task['_id'] = str(task['_id'])
-            return jsonify(large)
+            return jsonify(tasks)
 
         elif request.method == 'POST':
-            # Here I am Creating a new large 
+            # Here I am Creating a new task
             new_task = request.get_json()
             new_task['_id'] = ObjectId()
             tasks_collection.insert_one(new_task)
@@ -40,7 +40,7 @@ def list_and_create_tasks():
 @tasks_bp.route('/<task_id>', methods=['GET', 'PUT', 'DELETE'])
 def manage_individual_task(task_id):
     try:
-        tasks_collection = mongo.db.large
+        tasks_collection = mongo.db.tasks
 
         if request.method == 'GET':
             # This is for Getting a single task through ID
@@ -53,7 +53,7 @@ def manage_individual_task(task_id):
                 return jsonify({"error": "Task not found"})
 
         elif request.method == 'PUT':
-            # ----------> Update a large 
+            # ----------> Update a task
             update_data = request.get_json()
             result = tasks_collection.update_one({'_id': ObjectId(task_id)}, {'$set': update_data})
 
@@ -67,7 +67,7 @@ def manage_individual_task(task_id):
                 return jsonify({"error": "Task not found"})
 
         elif request.method == 'DELETE':
-            # --------->Delete a large 
+            # --------->Delete a task
             result = tasks_collection.delete_one({'_id': ObjectId(task_id)})
             if result.deleted_count > 0:
                 return jsonify({"message": "Task deleted successfully"})
@@ -78,8 +78,10 @@ def manage_individual_task(task_id):
         return jsonify({"error": str(e)})
 
 # Register the Blueprint with the Flask app
-app.register_blueprint(tasks_bp, url_prefix='/large')
+app.register_blueprint(tasks_bp, url_prefix='/tasks')
+
 if __name__ == '__main__':
     app.run(debug=True)
+
 
      
